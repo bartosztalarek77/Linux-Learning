@@ -1,161 +1,186 @@
-<!doctype html>
-<html lang="pl">
-<head>
-  <meta charset="utf-8">
-  <title>Vagrant + VMware Fusion (Apple Silicon) — README</title>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#24292e; line-height:1.6; padding:24px;">
-  <div style="max-width:900px; margin:0 auto;">
-    <header style="display:flex; align-items:center; justify-content:space-between;">
-      <h1 style="margin:0 0 8px 0;">🖥️ Vagrant + VMware Fusion (Apple Silicon)</h1>
-      <small style="color:#6a737d">README (HTML)</small>
-    </header>
+# Vagrant & VMware Development Environment on Apple Silicon Macs
 
-    <p style="margin-top:0;">Krok po kroku: instalacja Rosetta, Vagrant, VMware Fusion Tech Preview oraz uruchomienie maszyn Ubuntu i CentOS przez Vagrant + VMware provider.</p>
+This guide provides step-by-step instructions for setting up a complete local development environment using Vagrant and VMware Fusion on an Apple Silicon (M1/M2/M3) Mac.
 
-    <nav style="background:#f6f8fa; border:1px solid #e1e4e8; padding:12px; border-radius:6px; margin:16px 0;">
-      <strong>Spis treści</strong>
-      <ul style="margin:8px 0 0 20px;">
-        <li><a href="#wymagania">Wymagania</a></li>
-        <li><a href="#rosseta">1. Zainstaluj Rosetta</a></li>
-        <li><a href="#vagrant">2. Zainstaluj Vagrant</a></li>
-        <li><a href="#konto">3. Konto Broadcom/VMware</a></li>
-        <li><a href="#fusion">4–5. VMware Fusion — pobranie, instalacja, uprawnienia</a></li>
-        <li><a href="#vmware-utility">6–7. vagrant-vmware-utility i plugin</a></li>
-        <li><a href="#ubuntu">8–10. Ubuntu VM</a></li>
-        <li><a href="#centos">11–13. CentOS VM</a></li>
-        <li><a href="#troubleshooting">Rozwiązywanie problemów</a></li>
-      </ul>
-    </nav>
+## 📋 Prerequisites
 
-    <section id="wymagania">
-      <h2>Wymagania</h2>
-      <ul>
-        <li>macOS na Apple Silicon</li>
-        <li>Homebrew (jeśli brak: <code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code>)</li>
-        <li>Konto Broadcom/VMware (https://support.broadcom.com) do pobrania VMware Fusion Tech Preview</li>
-      </ul>
-    </section>
+Before you begin, ensure you have the following:
+*   An Apple Silicon Mac (M1, M2, M3, etc.).
+*   [Homebrew](https://brew.sh/) installed.
+*   Administrator privileges on your machine.
 
-    <section id="rosseta">
-      <h2>1. Zainstaluj Rosetta</h2>
-      <p>W terminalu:</p>
-      <pre style="background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto;"><code>/usr/sbin/softwareupdate --install-rosetta --agree-to-license</code></pre>
-    </section>
+---
 
-    <section id="vagrant">
-      <h2>2. Zainstaluj Vagrant</h2>
-      <pre style="background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto;"><code>brew install vagrant</code></pre>
-    </section>
+## ⚙️ Part 1: One-Time Environment Setup
 
-    <section id="konto">
-      <h2>3. Załóż konto Broadcom / VMware</h2>
-      <p>Otwórz: <a href="https://support.broadcom.com">https://support.broadcom.com</a> i zarejestruj konto, aby pobrać VMware Fusion Tech Preview.</p>
-    </section>
+Follow these steps to install and configure all the necessary software. This only needs to be done once.
 
-    <section id="fusion">
-      <h2>4–5. Pobierz i zainstaluj VMware Fusion (Tech Preview) i nadaj uprawnienia</h2>
-      <ol>
-        <li>Zaloguj się na konto Broadcom/VMware.</li>
-        <li>W sekcji pobrań wybierz <strong>VMware Fusion → VMware Fusion 13 Pro for Personal Use → 13.6</strong> i pobierz.</li>
-        <li>Otwórz pobrany .dmg i zainstaluj (dwukliknij ikonę i potwierdź hasłem administratora).</li>
-      </ol>
+### 1. Install Rosetta 2
 
-      <h3>Accessibility (Dostępność)</h3>
-      <ol>
-        <li>Otwórz System Settings (Ustawienia systemowe).</li>
-        <li>Przejdź do Privacy & Security → Accessibility.</li>
-        <li>Włącz przełącznik dla VMware Fusion.</li>
-      </ol>
-    </section>
+Rosetta is required to run some Intel-based tools on Apple Silicon.
 
-    <section id="vmware-utility">
-      <h2>6–7. Zainstaluj vagrant-vmware-utility i plugin</h2>
-      <p>W terminalu:</p>
-      <pre style="background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto;"><code>brew install --cask vagrant-vmware-utility
-vagrant plugin install vagrant-vmware-desktop</code></pre>
-      <p>Uwaga: plugin i utility mogą mieć wymagania licencyjne. Jeśli napotkasz problemy, sprawdź dokumentację pluginu i wersję Vagrant.</p>
-    </section>
+```bash
+/usr/sbin/softwareupdate --install-rosetta --agree-to-license
+```
 
-    <section id="ubuntu">
-      <h2>8–10. Ubuntu VM</h2>
-      <h3>Przygotowanie folderu</h3>
-      <pre style="background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto;"><code>cd
+### 2. Install Vagrant
+
+Use Homebrew to install the Vagrant CLI.
+
+```bash
+brew install vagrant
+```
+
+### 3. Get VMware Fusion Pro for Personal Use
+
+VMware Fusion is required as the virtualization provider. You can get a free license for personal use.
+
+1.  **Create a Broadcom Account**: Go to [https://support.broadcom.com](https://support.broadcom.com) and click **Register**.
+2.  **Navigate to Downloads**:
+    *   After logging in, click your profile in the top-right corner and select **VMware Cloud Foundation**.
+    *   Click **My Downloads** in the new menu.
+    *   Search for or select **VMware Fusion**.
+3.  **Download the Software**:
+    *   Select the product **VMware Fusion 13 Pro for Personal Use**.
+    *   Choose the latest version (e.g., `13.x.x`).
+    *   Click the **Download** icon to get the installer.
+4.  **Install VMware Fusion**:
+    *   Double-click the downloaded `.dmg` file.
+    *   Double-click the VMware Fusion icon in the window that appears and follow the installation prompts, entering your password when required.
+
+### 4. Grant Accessibility Permissions
+
+VMware Fusion needs system permissions to function correctly.
+
+1.  Open **System Settings**.
+2.  Go to **Privacy & Security** -> **Accessibility**.
+3.  Find **VMware Fusion** in the list and toggle the switch **on**. You may need to unlock with your password.
+
+### 5. Install Vagrant VMware Utility
+
+This utility allows Vagrant to communicate with VMware Fusion.
+
+```bash
+brew install --cask vagrant-vmware-utility
+```
+
+### 6. Install Vagrant VMware Plugin
+
+This is the core plugin that integrates Vagrant with the VMware provider.
+
+```bash
+vagrant plugin install vagrant-vmware-desktop
+```
+
+> ✅ **Setup Complete!** Your machine is now ready to run Vagrant-managed virtual machines with VMware.
+
+---
+
+## 🚀 Part 2: Creating and Managing a VM
+
+Here’s how to create and manage your virtual machines.
+
+### Step 1: Create a Project Directory
+
+It's best practice to create a separate directory for each virtual machine.
+
+```bash
+# Example for an Ubuntu VM
 mkdir -p ~/Desktop/vms/ubuntu
-cd ~/Desktop/vms/ubuntu</code></pre>
+cd ~/Desktop/vms/ubuntu
+```
 
-      <h3>Vagrantfile (Ubuntu)</h3>
-      <p>Utwórz plik <code>Vagrantfile</code> i wklej:</p>
-      <pre style="background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto;"><code>Vagrant.configure("2") do |config|
+### Step 2: Create a `Vagrantfile`
+
+This file defines your virtual machine's configuration. Create a file named `Vagrantfile` inside your project directory.
+
+```bash
+# You can use any text editor, `vim` is just an example
+vim Vagrantfile
+```
+
+### Step 3: Add Configuration to `Vagrantfile`
+
+Copy and paste one of the configurations below into your `Vagrantfile`.
+
+---
+
+#### Example A: Ubuntu (ARM)
+
+This will set up an Ubuntu VM compatible with Apple Silicon.
+
+```ruby
+# Vagrantfile
+Vagrant.configure("2") do |config|
   config.vm.box = "spox/ubuntu-arm"
   config.vm.box_version = "1.0.0"
+
   config.vm.network "private_network", ip: "192.168.56.11"
 
   config.vm.provider "vmware_desktop" do |vmware|
     vmware.gui = true
     vmware.allowlist_verified = true
   end
-end</code></pre>
+end
+```
 
-      <h3>Uruchamianie</h3>
-      <pre style="background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto;"><code>vagrant up
-vagrant ssh
-# w VM:
-sudo -i
-ip addr show
-# wyjście z VM:
-exit
-exit
-# zatrzymanie i usunięcie:
-vagrant halt
-vagrant destroy</code></pre>
-    </section>
+---
 
-    <section id="centos">
-      <h2>11–13. CentOS VM</h2>
-      <h3>Przygotowanie folderu</h3>
-      <pre style="background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto;"><code>cd
+#### Example B: CentOS Stream 9 (ARM)
+
+This will set up a CentOS Stream 9 VM compatible with Apple Silicon.
+
+```bash
+# First, create the directory
 mkdir -p ~/Desktop/vms/centos
-cd ~/Desktop/vms/centos</code></pre>
+cd ~/Desktop/vms/centos
+# Then create the Vagrantfile with the content below
+```
 
-      <h3>Vagrantfile (CentOS — przykład)</h3>
-      <p>Uwaga: nazwa boxa może być inna — upewnij się, że używasz boxa kompatybilnego z architekturą ARM (aarch64).</p>
-      <pre style="background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto;"><code>Vagrant.configure("2") do |config|
-  # Podmień poniższą nazwę boxa na właściwą, jeśli trzeba
+```ruby
+# Vagrantfile
+Vagrant.configure("2") do |config|
   config.vm.box = "bandit145/centos-stream9-arm"
+
   config.vm.network "private_network", ip: "192.168.56.12"
 
   config.vm.provider "vmware_desktop" do |vmware|
     vmware.gui = true
     vmware.allowlist_verified = true
   end
-end</code></pre>
+end
+```
 
-      <h3>Uruchamianie</h3>
-      <pre style="background:#0d1117; color:#c9d1d9; padding:12px; border-radius:6px; overflow:auto;"><code>vagrant up
+---
+
+## ✨ Part 3: VM Lifecycle Commands
+
+Run these commands from your terminal, inside the directory containing your `Vagrantfile` (e.g., `~/Desktop/vms/ubuntu`).
+
+| Command         | Description                                               |
+| --------------- | --------------------------------------------------------- |
+| `vagrant up`      | Starts and provisions the virtual machine.                |
+| `vagrant ssh`     | Connects to the running machine via SSH.                  |
+| `vagrant halt`    | Shuts down the virtual machine gracefully.                |
+| `vagrant suspend` | Pauses the virtual machine, saving its current state.     |
+| `vagrant resume`  | Resumes a suspended virtual machine.                      |
+| `vagrant destroy` | **Deletes the virtual machine and all its data.** Use with caution. |
+
+### Typical Workflow Example
+
+```bash
+# 1. Start the machine
+vagrant up
+
+# 2. Connect to it
 vagrant ssh
-# w VM:
-sudo -i
-ip addr show
-# wyjście
-exit
-exit
+
+# Inside the VM, you can check its IP and work as root
+# sudo -i
+# ip addr show
+# exit
+# exit
+
+# 3. When you're done for the day, shut it down
 vagrant halt
-vagrant destroy</code></pre>
-    </section>
-
-    <section id="troubleshooting">
-      <h2>Rozwiązywanie problemów</h2>
-      <ul>
-        <li>Plugin <code>vagrant-vmware-desktop</code> może wymagać konkretnej wersji Vagrant — sprawdź kompatybilność.</li>
-        <li>Jeśli VMware nie startuje, upewnij się, że nadałeś uprawnienia w Privacy & Security → Accessibility oraz Full Disk Access (jeśli wymagane).</li>
-        <li>Jeśli box nie jest dostępny dla ARM, wyszukaj alternatywny box na <a href="https://app.vagrantup.com/">app.vagrantup.com</a> (szukaj "arm", "aarch64" lub "arm64").</li>
-      </ul>
-    </section>
-
-    <footer style="margin-top:24px; padding-top:12px; border-top:1px solid #e1e4e8; color:#6a737d;">
-      <p>Plik wygenerowany automatycznie. Chcesz, żebym zrobił commit do repo? Podaj link lub uprawnienia. Potrzebujesz, żebym dopasował nazwy boxów — podaj je, to poprawię.</p>
-    </footer>
-  </div>
-</body>
-</html>
+```
