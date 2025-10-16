@@ -1,4 +1,4 @@
-# Vagrant & VMware Development Environment on Apple Silicon Macs
+# Vagrant & VMware Devlopment Environment on Apple Silicon Macs
 
 This guide provides step-by-step instructions for setting up a complete local development environment using Vagrant and VMware Fusion on an Apple Silicon (M1/M2/M3) Mac.
 
