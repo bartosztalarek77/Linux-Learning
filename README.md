@@ -1,167 +1,167 @@
-Markdown
-# Vagrant and VMware Fusion Setup Guide for Apple Silicon (ARM64)
+````markdown
+# Vagrant with VMware Fusion on macOS Apple Silicon
 
-This guide details the steps required to configure **Vagrant** with **VMware Fusion** on Apple Silicon Macs (M1/M2/M3, etc.). The goal is to run ARM64-based virtual machines (VMs), such as Ubuntu and CentOS Stream.
+Quick setup guide for running ARM virtual machines on Apple Silicon Macs using Vagrant and VMware Fusion.
 
 ## Prerequisites
 
-* An Apple Silicon-based Mac.
-* [Homebrew](https://brew.sh/) installed.
-* Basic knowledge of the terminal.
-* Administrator privileges on your Mac.
-
----
+- macOS 13+ on Apple Silicon (M1/M2/M3)
+- Admin access
+- Homebrew installed
 
 ## Installation Steps
 
-### 1. Install Rosetta 2
+### 1. Install Rosetta
 
-Rosetta 2 is necessary to run some x86_64 binaries that may be part of the tooling.
+Required for x86_64 compatibility on Apple Silicon:
 
-Open your terminal and execute the command:
 ```bash
 /usr/sbin/softwareupdate --install-rosetta --agree-to-license
-2. Install Vagrant
+```
 
-Use Homebrew to install Vagrant:
+### 2. Install Vagrant
 
-Bash
+```bash
 brew install vagrant
-3. Download & Install VMware Fusion
+```
 
-A VMware Fusion Pro license is required for the Vagrant plugin. A free Personal Use license is available.
+### 3. Create Broadcom Account
 
-Create a Broadcom Account: Go to https://support.broadcom.com and click "Register".
+Go to https://support.broadcom.com and register for an account. You'll need this to download VMware Fusion.
 
-Login to your account.
+### 4. Download and Install VMware Fusion 13 Pro
 
-Navigate to Downloads:
+1. Login to https://support.broadcom.com
+2. Click on your profile (top right) and select "VMware Cloud Foundation"
+3. Go to My Downloads
+4. Select VMware Fusion
+5. Choose "VMware Fusion 13 Pro for Personal Use"
+6. Select version 13.6
+7. Download and install
 
-Click your username in the top-right corner and select VMware Cloud Foundation.
+### 5. Grant macOS Permissions
 
-Click My Downloads.
+Open System Settings > Privacy & Security > Accessibility and enable VMware Fusion.
 
-Search for or select VMware Fusion.
+### 6. Install VMware Utility
 
-Select Version:
-
-Select VMware Fusion 13 Pro for Personal Use.
-
-Select version 13.6 (or the latest compatible version).
-
-Download and Install:
-
-Click the download icon.
-
-Once the .dmg file is downloaded, open it.
-
-Double-click the VMware Fusion icon to begin the installation and enter your system password when prompted.
-
-4. Grant Accessibility Permissions
-
-VMware Fusion requires accessibility permissions for Vagrant to properly manage VMs.
-
-Open System Settings.
-
-Go to Privacy & Security > Accessibility.
-
-Find VMware Fusion in the list and toggle the switch on. You may need to unlock the settings with your password first.
-
-5. Install Vagrant VMware Utility
-
-This is a helper utility required by the Vagrant plugin.
-
-Bash
+```bash
 brew install --cask vagrant-vmware-utility
-6. Install Vagrant VMware Plugin
+```
 
-This plugin connects Vagrant to VMware Fusion.
+### 7. Install Vagrant VMware Plugin
 
-Bash
+```bash
 vagrant plugin install vagrant-vmware-desktop
-Virtual Machine Setup
-Project 1: Ubuntu ARM
+```
 
-Create the project directory:
+## Creating Virtual Machines
 
-Bash
+### Ubuntu ARM VM
+
+Create project directory:
+```bash
 cd
 mkdir -p Desktop/vms/ubuntu
 cd Desktop/vms/ubuntu
-Create the Vagrantfile: Create a new file named Vagrantfile (e.g., using vim Vagrantfile or nano Vagrantfile) and paste the following content:
+```
 
-Ruby
+Create Vagrantfile with this content:
+```ruby
 Vagrant.configure("2") do |config|
   config.vm.box = "spox/ubuntu-arm"
   config.vm.box_version = "1.0.0"
   config.vm.network "private_network", ip: "192.168.56.11"
-
+  
   config.vm.provider "vmware_desktop" do |vmware|
     vmware.gui = true
     vmware.allowlist_verified = true
   end
 end
-Manage the VM: Ensure you are in the Desktop/vms/ubuntu directory in your terminal.
+```
 
-Bash
-# Bring up the virtual machine
+Start and test the VM:
+```bash
 vagrant up
-
-# Connect to the machine via SSH
 vagrant ssh
-
-# Inside the VM: get root privileges and check IP
 sudo -i
 ip addr show
 exit
 exit
+vagrant halt
+vagrant destroy
+```
 
-# --- VM Lifecycle Management ---
+### CentOS Stream 9 ARM VM
 
-# To stop the machine:
-# vagrant halt
-
-# To delete the machine:
-# vagrant destroy
-Project 2: CentOS Stream 9 ARM
-
-Create the project directory:
-
-Bash
+Create project directory:
+```bash
 cd
 mkdir -p Desktop/vms/centos
 cd Desktop/vms/centos
-Create the Vagrantfile: Create a new Vagrantfile in this directory and paste the following content:
+```
 
-Ruby
+Create Vagrantfile:
+```ruby
 Vagrant.configure("2") do |config|
   config.vm.box = "bandit145/centos_stream9_arm"
   config.vm.network "private_network", ip: "192.168.56.12"
-
+  
   config.vm.provider "vmware_desktop" do |vmware|
     vmware.gui = true
     vmware.allowlist_verified = true
   end
 end
-Manage the VM: Ensure you are in the Desktop/vms/centos directory in your terminal.
+```
 
-Bash
-# Bring up the virtual machine
+Start and test:
+```bash
 vagrant up
-
-# Connect to the machine via SSH
 vagrant ssh
-
-# Inside the VM: get root privileges and check IP
 sudo -i
 ip addr show
 exit
 exit
+vagrant halt
+vagrant destroy
+```
 
-# --- VM Lifecycle Management ---
+## Common Commands
 
-# To stop the machine:
-# vagrant halt
+```bash
+vagrant up        # start VM
+vagrant ssh       # connect to VM
+vagrant halt      # stop VM
+vagrant reload    # restart VM
+vagrant destroy   # delete VM
+```
 
-# To delete the machine:
-# vagrant destroy
+## Troubleshooting
+
+**VMware provider not found**
+- Run: `vagrant plugin install vagrant-vmware-desktop`
+- Verify with: `vagrant plugin list`
+
+**Network issues**
+- Make sure vagrant-vmware-utility is running
+- Try: `brew services restart vagrant-vmware-utility`
+
+**Permission errors**
+- Check System Settings > Privacy & Security > Accessibility
+- VMware Fusion must be enabled
+
+**IP conflicts**
+- Change the IP address in Vagrantfile to something else in the 192.168.56.x range
+- Run `vagrant reload` after changes
+
+**Rosetta missing error**
+- Install Rosetta: `/usr/sbin/softwareupdate --install-rosetta --agree-to-license`
+
+## Notes
+
+Default VM credentials are usually:
+- Username: vagrant
+- Password: vagrant
+
+The setup uses private networking, so VMs can communicate with each other and the host but are isolated from external networks.
+````
