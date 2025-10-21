@@ -1,120 +1,99 @@
-# Vagrant & VMware Devlopment Environment on Apple Silicon Macs
+Markdown
+# Vagrant and VMware Fusion Setup Guide for Apple Silicon (ARM64)
 
-This guide provides step-by-step instructions for setting up a complete local development environment using Vagrant and VMware Fusion on an Apple Silicon (M1/M2/M3) Mac.
+This guide details the steps required to configure **Vagrant** with **VMware Fusion** on Apple Silicon Macs (M1/M2/M3, etc.). The goal is to run ARM64-based virtual machines (VMs), such as Ubuntu and CentOS Stream.
 
-## 📋 Prerequisites
+## Prerequisites
 
-Before you begin, ensure you have the following:
-*   An Apple Silicon Mac (M1, M2, M3, etc.).
-*   [Homebrew](https://brew.sh/) installed.
-*   Administrator privileges on your machine.
+* An Apple Silicon-based Mac.
+* [Homebrew](https://brew.sh/) installed.
+* Basic knowledge of the terminal.
+* Administrator privileges on your Mac.
 
 ---
 
-## ⚙️ Part 1: One-Time Environment Setup
-
-Follow these steps to install and configure all the necessary software. This only needs to be done once.
+## Installation Steps
 
 ### 1. Install Rosetta 2
 
-Rosetta is required to run some Intel-based tools on Apple Silicon.
+Rosetta 2 is necessary to run some x86_64 binaries that may be part of the tooling.
 
+Open your terminal and execute the command:
 ```bash
 /usr/sbin/softwareupdate --install-rosetta --agree-to-license
-```
+2. Install Vagrant
 
-### 2. Install Vagrant
+Use Homebrew to install Vagrant:
 
-Use Homebrew to install the Vagrant CLI.
-
-```bash
+Bash
 brew install vagrant
-```
+3. Download & Install VMware Fusion
 
-### 3. Get VMware Fusion Pro for Personal Use
+A VMware Fusion Pro license is required for the Vagrant plugin. A free Personal Use license is available.
 
-VMware Fusion is required as the virtualization provider. You can get a free license for personal use.
+Create a Broadcom Account: Go to https://support.broadcom.com and click "Register".
 
-1.  **Create a Broadcom Account**: Go to [https://support.broadcom.com](https://support.broadcom.com) and click **Register**.
-2.  **Navigate to Downloads**:
-    *   After logging in, click your profile in the top-right corner and select **VMware Cloud Foundation**.
-    *   Click **My Downloads** in the new menu.
-    *   Search for or select **VMware Fusion**.
-3.  **Download the Software**:
-    *   Select the product **VMware Fusion 13 Pro for Personal Use**.
-    *   Choose the latest version (e.g., `13.x.x`).
-    *   Click the **Download** icon to get the installer.
-4.  **Install VMware Fusion**:
-    *   Double-click the downloaded `.dmg` file.
-    *   Double-click the VMware Fusion icon in the window that appears and follow the installation prompts, entering your password when required.
+Login to your account.
 
-### 4. Grant Accessibility Permissions
+Navigate to Downloads:
 
-VMware Fusion needs system permissions to function correctly.
+Click your username in the top-right corner and select VMware Cloud Foundation.
 
-1.  Open **System Settings**.
-2.  Go to **Privacy & Security** -> **Accessibility**.
-3.  Find **VMware Fusion** in the list and toggle the switch **on**. You may need to unlock with your password.
+Click My Downloads.
 
-### 5. Install Vagrant VMware Utility
+Search for or select VMware Fusion.
 
-This utility allows Vagrant to communicate with VMware Fusion.
+Select Version:
 
-```bash
+Select VMware Fusion 13 Pro for Personal Use.
+
+Select version 13.6 (or the latest compatible version).
+
+Download and Install:
+
+Click the download icon.
+
+Once the .dmg file is downloaded, open it.
+
+Double-click the VMware Fusion icon to begin the installation and enter your system password when prompted.
+
+4. Grant Accessibility Permissions
+
+VMware Fusion requires accessibility permissions for Vagrant to properly manage VMs.
+
+Open System Settings.
+
+Go to Privacy & Security > Accessibility.
+
+Find VMware Fusion in the list and toggle the switch on. You may need to unlock the settings with your password first.
+
+5. Install Vagrant VMware Utility
+
+This is a helper utility required by the Vagrant plugin.
+
+Bash
 brew install --cask vagrant-vmware-utility
-```
+6. Install Vagrant VMware Plugin
 
-### 6. Install Vagrant VMware Plugin
+This plugin connects Vagrant to VMware Fusion.
 
-This is the core plugin that integrates Vagrant with the VMware provider.
-
-```bash
+Bash
 vagrant plugin install vagrant-vmware-desktop
-```
+Virtual Machine Setup
+Project 1: Ubuntu ARM
 
-> ✅ **Setup Complete!** Your machine is now ready to run Vagrant-managed virtual machines with VMware.
+Create the project directory:
 
----
+Bash
+cd
+mkdir -p Desktop/vms/ubuntu
+cd Desktop/vms/ubuntu
+Create the Vagrantfile: Create a new file named Vagrantfile (e.g., using vim Vagrantfile or nano Vagrantfile) and paste the following content:
 
-## 🚀 Part 2: Creating and Managing a VM
-
-Here’s how to create and manage your virtual machines.
-
-### Step 1: Create a Project Directory
-
-It's best practice to create a separate directory for each virtual machine.
-
-```bash
-# Example for an Ubuntu VM
-mkdir -p ~/Desktop/vms/ubuntu
-cd ~/Desktop/vms/ubuntu
-```
-
-### Step 2: Create a `Vagrantfile`
-
-This file defines your virtual machine's configuration. Create a file named `Vagrantfile` inside your project directory.
-
-```bash
-# You can use any text editor, `vim` is just an example
-vim Vagrantfile
-```
-
-### Step 3: Add Configuration to `Vagrantfile`
-
-Copy and paste one of the configurations below into your `Vagrantfile`.
-
----
-
-#### Example A: Ubuntu (ARM)
-
-This will set up an Ubuntu VM compatible with Apple Silicon.
-
-```ruby
-# Vagrantfile
+Ruby
 Vagrant.configure("2") do |config|
   config.vm.box = "spox/ubuntu-arm"
   config.vm.box_version = "1.0.0"
-
   config.vm.network "private_network", ip: "192.168.56.11"
 
   config.vm.provider "vmware_desktop" do |vmware|
@@ -122,26 +101,41 @@ Vagrant.configure("2") do |config|
     vmware.allowlist_verified = true
   end
 end
-```
+Manage the VM: Ensure you are in the Desktop/vms/ubuntu directory in your terminal.
 
----
+Bash
+# Bring up the virtual machine
+vagrant up
 
-#### Example B: CentOS Stream 9 (ARM)
+# Connect to the machine via SSH
+vagrant ssh
 
-This will set up a CentOS Stream 9 VM compatible with Apple Silicon.
+# Inside the VM: get root privileges and check IP
+sudo -i
+ip addr show
+exit
+exit
 
-```bash
-# First, create the directory
-mkdir -p ~/Desktop/vms/centos
-cd ~/Desktop/vms/centos
-# Then create the Vagrantfile with the content below
-```
+# --- VM Lifecycle Management ---
 
-```ruby
-# Vagrantfile
+# To stop the machine:
+# vagrant halt
+
+# To delete the machine:
+# vagrant destroy
+Project 2: CentOS Stream 9 ARM
+
+Create the project directory:
+
+Bash
+cd
+mkdir -p Desktop/vms/centos
+cd Desktop/vms/centos
+Create the Vagrantfile: Create a new Vagrantfile in this directory and paste the following content:
+
+Ruby
 Vagrant.configure("2") do |config|
-  config.vm.box = "bandit145/centos-stream9-arm"
-
+  config.vm.box = "bandit145/centos_stream9_arm"
   config.vm.network "private_network", ip: "192.168.56.12"
 
   config.vm.provider "vmware_desktop" do |vmware|
@@ -149,38 +143,25 @@ Vagrant.configure("2") do |config|
     vmware.allowlist_verified = true
   end
 end
-```
+Manage the VM: Ensure you are in the Desktop/vms/centos directory in your terminal.
 
----
-
-## ✨ Part 3: VM Lifecycle Commands
-
-Run these commands from your terminal, inside the directory containing your `Vagrantfile` (e.g., `~/Desktop/vms/ubuntu`).
-
-| Command         | Description                                               |
-| --------------- | --------------------------------------------------------- |
-| `vagrant up`      | Starts and provisions the virtual machine.                |
-| `vagrant ssh`     | Connects to the running machine via SSH.                  |
-| `vagrant halt`    | Shuts down the virtual machine gracefully.                |
-| `vagrant suspend` | Pauses the virtual machine, saving its current state.     |
-| `vagrant resume`  | Resumes a suspended virtual machine.                      |
-| `vagrant destroy` | **Deletes the virtual machine and all its data.** Use with caution. |
-
-### Typical Workflow Example
-
-```bash
-# 1. Start the machine
+Bash
+# Bring up the virtual machine
 vagrant up
 
-# 2. Connect to it
+# Connect to the machine via SSH
 vagrant ssh
 
-# Inside the VM, you can check its IP and work as root
-# sudo -i
-# ip addr show
-# exit
-# exit
+# Inside the VM: get root privileges and check IP
+sudo -i
+ip addr show
+exit
+exit
 
-# 3. When you're done for the day, shut it down
-vagrant halt
-```
+# --- VM Lifecycle Management ---
+
+# To stop the machine:
+# vagrant halt
+
+# To delete the machine:
+# vagrant destroy
